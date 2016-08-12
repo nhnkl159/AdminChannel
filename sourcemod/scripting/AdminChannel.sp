@@ -9,6 +9,8 @@
 #include <sdktools>
 #include <colors>
 
+bool IsInChannel[MAXPLAYERS + 1] =  { false, ... };
+
 public Plugin myinfo = 
 {
 	name = "[CS:GO] AdminChannel",
@@ -17,8 +19,6 @@ public Plugin myinfo =
 	version = PLUGIN_VERSION,
 	url = "none"
 };
-
-bool IsInChannel[MAXPLAYERS + 1] =  { false, ... };
 
 public void OnPluginStart()
 {
