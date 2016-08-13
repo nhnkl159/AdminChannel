@@ -2,9 +2,9 @@
 
 ## Commands
 
-1. **sm_ac**
-2. **sm_adminchannel**
+* **sm_ac**
+* **sm_adminchannel**
 
-####Opens the AdminChannel Gui
+Both open the AdminChannel menu.
 
-![Example in game](http://i.imgur.com/4WliR3w.jpg)
+![In-game example](https://i.imgur.com/4WliR3w.jpg)
