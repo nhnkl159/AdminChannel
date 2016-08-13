@@ -1,138 +1,104 @@
-#pragma semicolon 1
-
-#define DEBUG
-
-#define PLUGIN_AUTHOR "nhnkl159"
-#define PLUGIN_VERSION "1.0"
-
 #include <sourcemod>
 #include <sdktools>
-#include <colors>
 
-bool IsInChannel[MAXPLAYERS + 1] =  { false, ... };
+#pragma semicolon 1
+#pragma newdecls required
 
-public Plugin myinfo = 
+#define PLUGIN_VERSION "1.1"
+
+char gS_Prefix[32];
+bool gB_IsInChannel[MAXPLAYERS+1];
+
+public Plugin myinfo =
 {
 	name = "[CS:GO] AdminChannel",
-	author = PLUGIN_AUTHOR,
+	author = "nhnkl159",
 	description = "none",
 	version = PLUGIN_VERSION,
-	url = "none"
+	url = "https://github.com/nhnkl159/AdminChannel"
 };
 
 public void OnPluginStart()
 {
-	RegAdminCmd("sm_adminchannel", Cmd_AdminChannel, ADMFLAG_BAN);
-	RegAdminCmd("sm_ac", Cmd_AdminChannel, ADMFLAG_BAN);
+	FormatEx(gS_Prefix, 32, "%s\x05[AdminChannel]\x01 ", (GetEngineVersion() == Engine_CSGO)? " ":"");
+
+	RegAdminCmd("sm_adminchannel", Command_AdminChannel, ADMFLAG_CHAT);
+	RegAdminCmd("sm_ac", Command_AdminChannel, ADMFLAG_CHAT);
+
+	CreateConVar("sm_adminchannel_version", PLUGIN_VERSION, "Plugin version.", FCVAR_DONTRECORD);
 }
 
 public void OnMapStart()
 {
-	for(int i = 0; i < MaxClients; i++)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsFuckingValidClient(i))
-		{
-			IsInChannel[i] = false;
-		}
+		gB_IsInChannel[i] = false;
 	}
 }
 
-public Action Cmd_AdminChannel(int client, int args)
+public Action Command_AdminChannel(int client, int args)
 {
-	if(!IsFuckingValidClient(client))
+	if(client == 0)
 	{
 		return Plugin_Handled;
 	}
-	
-	ShowMenu(client);
-	
-	return Plugin_Handled;
+
+	return ShowMenu(client);
 }
 
-void ShowMenu(int client)
+public Action ShowMenu(int client)
 {
-	char ChannelFormat[258];
-	Format(ChannelFormat, sizeof(ChannelFormat), "Admin Channel : [%s]", IsInChannel[client] ? "X":"");
+	if(!IsClientInGame(client))
+	{
+		return Plugin_Handled;
+	}
+
+	char ChannelFormat[32];
+	FormatEx(ChannelFormat, 32, "Admin channel: [%s]", (gB_IsInChannel[client])? "X":"");
+
 	Menu menu = new Menu(AdminMenuHandler);
-	menu.SetTitle("Admin channel status :");
-	menu.AddItem("", ChannelFormat);
+	menu.SetTitle("Admin channel status:");
 	menu.Display(client, MENU_TIME_FOREVER);
+
+	return Plugin_Handled;
 }
 
 public int AdminMenuHandler(Menu menu, MenuAction action, int client, int item)
 {
 	if(action == MenuAction_Select)
 	{
-		if(IsInChannel[client] == true)
+		gB_IsInChannel[client] = !gB_IsInChannel[client];
+		SetClientVoice(client, gB_IsInChannel[client]);
+
+		if(gB_IsInChannel[client])
 		{
-			SetClientVoice(client, false);
-			CPrintToChat(client, "\x05[AdminChannel]\x01 You \x07quit\x01 the admin channel , you can now hear all the players !");
-			IsInChannel[client] = false;
+			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
 		}
+
 		else
 		{
-			SetClientVoice(client, true);
-			CPrintToChat(client, "\x05[AdminChannel]\x01 You \x07entered\x01 the admin channel , you can now hear all the admins who is in the channel !");
-			IsInChannel[client] = true;
+			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
 		}
+
 		ShowMenu(client);
 	}
-	if(action == MenuAction_Cancel)
+
+	else if(action == MenuAction_End)
 	{
 		delete menu;
 	}
 }
 
-stock int SetClientVoice(int client, bool boolean)
+public void SetClientVoice(int client, bool adminchannel)
 {
-	if(boolean)
+	for(int i = 1; i <= MaxClients; i++)
 	{
-		for(int i = 0; i < MaxClients; i++)
+		if(IsClientInGame(i))
 		{
-			if(IsInChannel[i] == true && IsFuckingValidClient(i))
-			{
-				SetListenOverride(i, client, Listen_Yes);
-				SetListenOverride(client, i, Listen_Yes);
-			}
-		}
-		
-		for(int i = 0; i < MaxClients; i++)
-		{
-			if(IsInChannel[i] != true && IsFuckingValidClient(i))
-			{
-				SetListenOverride(i, client, Listen_No);
-				SetListenOverride(client, i, Listen_No);
-			}
-		}
-	}
-	else
-	{
-		for(int i = 0; i < MaxClients; i++)
-		{
-			if(IsInChannel[i] == true && IsFuckingValidClient(i))
-			{
-				SetListenOverride(i, client, Listen_No);
-				SetListenOverride(client, i, Listen_No);
-			}
-		}
-		
-		for(int i = 0; i < MaxClients; i++)
-		{
-			if(IsInChannel[i] != true && IsFuckingValidClient(i))
-			{
-				SetListenOverride(i, client, Listen_Yes);
-				SetListenOverride(client, i, Listen_Yes);
-			}
-		}
-	}
-}
+			ListenOverride override = ((adminchannel && gB_IsInChannel[i]) || !gB_IsInChannel[i])? Listen_Yes:Listen_No;
 
-
-stock bool IsFuckingValidClient(int client, bool alive = false, bool bots = false)
-{
-	if (client > 0 && client <= MaxClients && IsClientInGame(client) && (alive == false || IsPlayerAlive(client)) && (bots == false && !IsFakeClient(client)))
-	{
-		return true;
+			SetListenOverride(i, client, override);
+			SetListenOverride(client, i, override);
+		}
 	}
-	return false;
 }
