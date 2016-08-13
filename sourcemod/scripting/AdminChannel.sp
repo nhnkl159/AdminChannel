@@ -77,7 +77,7 @@ public int AdminMenuHandler(Menu menu, MenuAction action, int client, int item)
 
 		else
 		{
-			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
+			PrintToChat(client, "%sYou have \entered\x01 the admin voice channel, you can now hear who is in the admins channel.", gS_Prefix);
 		}
 
 		ShowMenu(client);
