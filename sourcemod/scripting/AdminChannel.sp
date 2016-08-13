@@ -95,7 +95,7 @@ public void SetClientVoice(int client, bool adminchannel)
 	{
 		if(IsClientInGame(i))
 		{
-			ListenOverride override = ((adminchannel && gB_IsInChannel[i]) || !gB_IsInChannel[i])? Listen_Yes:Listen_No;
+			ListenOverride override = ((adminchannel && gB_IsInChannel[i]) || (adminchannel && !gB_IsInChannel[i]))? Listen_Yes:Listen_No;
 
 			SetListenOverride(i, client, override);
 			SetListenOverride(client, i, override);
