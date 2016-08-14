@@ -68,17 +68,22 @@ public int AdminMenuHandler(Menu menu, MenuAction action, int client, int item)
 {
 	if(action == MenuAction_Select)
 	{
+		char CheckColors[16];
+		EngineVersion g_Game = GetEngineVersion();
+		
+		strcopy(CheckColors, 16, (g_Game == Engine_CSS) ? "\x07FF4040":"\x07");
+		
 		gB_IsInChannel[client] = !gB_IsInChannel[client];
 		SetClientVoice(client, gB_IsInChannel[client]);
 
 		if(gB_IsInChannel[client])
 		{
-			PrintToChat(client, "%sYou have \x07entered\x01 the admin voice channel, you can now hear who is in the admins channel.", gS_Prefix);
+			PrintToChat(client, "%sYou have %s entered\x01 the admin voice channel, you can now hear who is in the admins channel.", gS_Prefix, CheckColors);
 		}
 
 		else
 		{
-			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
+			PrintToChat(client, "%sYou have %s quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix, CheckColors);
 		}
 
 		ShowMenu(client);
