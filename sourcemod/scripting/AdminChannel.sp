@@ -58,6 +58,7 @@ public Action ShowMenu(int client)
 
 	Menu menu = new Menu(AdminMenuHandler);
 	menu.SetTitle("Admin channel status:");
+	menu.AddItem("", ChannelFormat);
 	menu.Display(client, MENU_TIME_FOREVER);
 
 	return Plugin_Handled;
@@ -72,12 +73,12 @@ public int AdminMenuHandler(Menu menu, MenuAction action, int client, int item)
 
 		if(gB_IsInChannel[client])
 		{
-			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
+			PrintToChat(client, "%sYou have \x07entered\x01 the admin voice channel, you can now hear who is in the admins channel.", gS_Prefix);
 		}
 
 		else
 		{
-			PrintToChat(client, "%sYou have \x07entered\x01 the admin voice channel, you can now hear who is in the admins channel.", gS_Prefix);
+			PrintToChat(client, "%sYou have \x07quit\x01 the admin voice channel, you can now hear non-admins.", gS_Prefix);
 		}
 
 		ShowMenu(client);
